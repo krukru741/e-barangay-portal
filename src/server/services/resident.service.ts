@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db'
+import { prisma } from 'src/lib/db'
 
 export async function getResidents() {
   return await prisma.resident.findMany({

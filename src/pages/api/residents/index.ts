@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getResidents, createResident } from '@/server/services/resident.service'
+import { getResidents, createResident } from 'src/server/services/resident.service'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
