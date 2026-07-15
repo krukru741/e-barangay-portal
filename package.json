@@ -55,6 +55,7 @@
     "apexcharts-clevision": "3.28.5",
     "bcryptjs": "^3.0.3",
     "clsx": "^1.1.1",
+    "dotenv": "^17.4.2",
     "mdi-material-ui": "^7.1.0",
     "next": "12.0.4",
     "next-auth": "^4.24.14",

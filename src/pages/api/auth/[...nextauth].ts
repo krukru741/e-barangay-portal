@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
     signIn: '/pages/login',
     error: '/pages/login'
   },
-  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only',
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || 'fallback-secret-for-development-only',
 }
 
 export default NextAuth(authOptions)
