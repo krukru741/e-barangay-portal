@@ -1,8 +1,8 @@
 // ** React Imports
 import { useState, SyntheticEvent, Fragment } from 'react'
 
-// ** Next Import
 import { useRouter } from 'next/router'
+import { useSession, signOut } from 'next-auth/react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -38,6 +38,10 @@ const UserDropdown = () => {
 
   // ** Hooks
   const router = useRouter()
+  const { data: session } = useSession()
+
+  const userName = session?.user?.name || 'Admin User'
+  const userEmail = session?.user?.email || 'admin@ebarangay.gov.ph'
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
@@ -74,7 +78,7 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Avatar
-          alt='John Doe'
+          alt={userName}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
           src='/images/avatars/1.png'
@@ -95,12 +99,12 @@ const UserDropdown = () => {
               badgeContent={<BadgeContentSpan />}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-              <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar alt={userName} src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{userName}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                Admin
+                {userEmail}
               </Typography>
             </Box>
           </Box>
@@ -144,7 +148,10 @@ const UserDropdown = () => {
           </Box>
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose('/pages/login')}>
+        <MenuItem sx={{ py: 2 }} onClick={() => {
+          handleDropdownClose()
+          signOut({ callbackUrl: '/pages/login' })
+        }}>
           <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
           Logout
         </MenuItem>
