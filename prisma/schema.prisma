@@ -101,6 +101,16 @@ model Hearing {
   createdAt   DateTime  @default(now())
 }
 
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  type        AnnouncementType @default(GENERAL)
+  isPinned    Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  expiresAt   DateTime?
+}
+
 // Enums
 enum Gender {
   MALE
@@ -147,4 +157,11 @@ enum BlotterStatus {
   RESOLVED
   ESCALATED
   CLOSED
+}
+
+enum AnnouncementType {
+  GENERAL
+  EMERGENCY
+  EVENT
+  ADVISORY
 }
