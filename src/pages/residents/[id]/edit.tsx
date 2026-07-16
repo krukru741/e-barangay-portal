@@ -349,16 +349,31 @@ export default function EditResident() {
               </Grid>
 
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth label='House Number' name='houseNumber' value={formData.houseNumber} onChange={handleChange} disabled={isAddressDisabled} />
+                <TextField fullWidth label='House Number' name='houseNumber' placeholder='e.g. 123' value={formData.houseNumber} onChange={handleChange} disabled={isAddressDisabled} />
               </Grid>
               <Grid item xs={12} sm={8}>
                 <TextField fullWidth label='Street Name' name='street' value={formData.street} onChange={handleChange} required disabled={isAddressDisabled} />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField fullWidth label='Sitio (Optional)' name='sitio' value={formData.sitio} onChange={handleChange} disabled={isAddressDisabled} />
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth label='Sitio (Optional)' name='sitio' value={formData.sitio} onChange={handleChange} disabled={isAddressDisabled} inputProps={{ sx: { textTransform: 'capitalize' } }} />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField fullWidth label='Purok (Optional)' name='purok' value={formData.purok} onChange={handleChange} disabled={isAddressDisabled} />
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth disabled={isAddressDisabled}>
+                  <InputLabel>Purok (Optional)</InputLabel>
+                  <Select label='Purok (Optional)' name='purok' value={formData.purok} onChange={handleChange}>
+                    <MenuItem value=''><em>None</em></MenuItem>
+                    <MenuItem value='1'>Purok 1</MenuItem>
+                    <MenuItem value='2'>Purok 2</MenuItem>
+                    <MenuItem value='3'>Purok 3</MenuItem>
+                    <MenuItem value='4'>Purok 4</MenuItem>
+                    <MenuItem value='5'>Purok 5</MenuItem>
+                    <MenuItem value='6'>Purok 6</MenuItem>
+                    <MenuItem value='7'>Purok 7</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth label='Barangay' name='barangay' value={formData.barangay} onChange={handleChange} required disabled={isAddressDisabled} />
               </Grid>
 
               <Grid item xs={12}>

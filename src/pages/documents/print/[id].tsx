@@ -37,6 +37,42 @@ export default function DocumentPrintView() {
   const sitio = resident.household?.sitio ? resident.household.sitio.charAt(0).toUpperCase() + resident.household.sitio.slice(1) : '__________'
   const purok = resident.household?.purok ? resident.household.purok.charAt(0).toUpperCase() + resident.household.purok.slice(1) : '__________'
 
+  // Helper function para sa limpyo nga address rendering
+  const formatAddress = (residentData: any) => {
+    if (!residentData?.household) return '__________'
+    const parts = []
+    const h = residentData.household
+    
+    if (h.houseNumber && h.houseNumber.toLowerCase() !== 'n/a') {
+      parts.push(`House No. ${h.houseNumber}`)
+    }
+    if (h.street && h.street.toLowerCase() !== 'n/a') {
+      parts.push(h.street)
+    }
+    if (h.sitio && h.sitio.toLowerCase() !== 'n/a') {
+      parts.push(`Sitio ${h.sitio.charAt(0).toUpperCase() + h.sitio.slice(1)}`)
+    }
+    if (h.purok && h.purok.toLowerCase() !== 'n/a') {
+      let p = h.purok.charAt(0).toUpperCase() + h.purok.slice(1)
+      if (!p.toLowerCase().startsWith('purok')) p = `Purok ${p}`
+      parts.push(p)
+    }
+    
+    // Limpyohan ang Barangay field aron malikayan ang double "Barangay"
+    let brgy = h.barangay || "Poblacion"
+    if (brgy.toLowerCase().startsWith("barangay ")) {
+      brgy = brgy.substring(9).trim()
+    }
+    parts.push(`Barangay ${brgy}`)
+
+    // I-add ang Municipality ug Province
+    parts.push("Talisay City", "Cebu")
+
+    return parts.join(", ")
+  }
+
+  const fullAddress = formatAddress(resident)
+
   const handlePrint = () => {
     window.print()
   }
@@ -148,8 +184,7 @@ export default function DocumentPrintView() {
             <>
               <Typography sx={{ textIndent: '40px', mb: 2, textAlign: 'justify' }}>
                 This is to certify that {titlePrefix} <strong>{fullName.toUpperCase()}</strong>, {age} years of age, 
-                is a bona fide resident of Sitio {sitio}, Purok {purok}, 
-                Barangay {resident.household?.barangay || '__________'}, Talisay City, Cebu.
+                is a bona fide resident of {fullAddress}.
               </Typography>
               <Typography sx={{ textIndent: '40px', mb: 2, textAlign: 'justify' }}>
                 This is to certify further that he/she is known to us personally as a person of good moral character 
@@ -166,7 +201,7 @@ export default function DocumentPrintView() {
           {type !== 'CLEARANCE' && (
             <Typography sx={{ textIndent: '40px', mb: 2, textAlign: 'justify' }}>
                This is to certify that {titlePrefix} <strong>{fullName.toUpperCase()}</strong>, {age} years of age, 
-               is a bona fide resident of Barangay {resident.household?.barangay || '__________'}, Talisay City, Cebu. 
+               is a bona fide resident of {fullAddress}. 
                This certification is issued for <strong>{purpose.toUpperCase()}</strong>.
             </Typography>
           )}
