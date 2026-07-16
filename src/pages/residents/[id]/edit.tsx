@@ -161,9 +161,10 @@ export default function EditResident() {
     setLoading(true)
 
     const payload = { ...formData }
-    if (!payload.householdId) {
-      delete (payload as any).householdId
-    }
+    if (!payload.householdId) delete (payload as any).householdId
+    if (!payload.occupation) delete (payload as any).occupation
+    if (!payload.educationalAttainment) delete (payload as any).educationalAttainment
+    if (!payload.incomeBracket) delete (payload as any).incomeBracket
 
     try {
       const res = await fetch(`/api/residents/${id}`, {
