@@ -18,10 +18,14 @@ import MenuItem from '@mui/material/MenuItem'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 import Autocomplete from '@mui/material/Autocomplete'
 
-export default function CreateResident() {
+export default function EditResident() {
   const router = useRouter()
+  const { id } = router.query
+
+  const [initialLoading, setInitialLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [households, setHouseholds] = useState<any[]>([])
   const [selectedHousehold, setSelectedHousehold] = useState<any | null>(null)
@@ -41,6 +45,7 @@ export default function CreateResident() {
     street: '',
     sitio: '',
     purok: '',
+    purok: '',
     barangay: 'Barangay Poblacion',
     isHeadOfFamily: false,
     isIndigent: false,
@@ -54,12 +59,72 @@ export default function CreateResident() {
     incomeBracket: ''
   })
 
+  // Fetch households for dropdown
   useEffect(() => {
     fetch('/api/households')
       .then(res => res.json())
       .then(data => setHouseholds(data))
       .catch(console.error)
   }, [])
+
+  useEffect(() => {
+    if (id) {
+      fetch(`/api/residents/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          // Format date for the input
+          const formattedDate = new Date(data.birthDate).toISOString().split('T')[0]
+          
+          setFormData({
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            middleName: data.middleName || '',
+            suffix: data.suffix || '',
+            birthDate: formattedDate,
+            gender: data.gender || 'MALE',
+            civilStatus: data.civilStatus || 'SINGLE',
+            contactNumber: data.contactNumber || '',
+            email: data.email || '',
+            householdId: data.householdId || '',
+            houseNumber: data.household?.houseNumber || '',
+            street: data.household?.street || '',
+            sitio: data.household?.sitio || '',
+            purok: data.household?.purok || '',
+            barangay: data.household?.barangay || 'Barangay Poblacion',
+            isHeadOfFamily: data.isHeadOfFamily || false,
+            isIndigent: data.isIndigent || false,
+            isSenior: data.isSenior || false,
+            isPWD: data.isPWD || false,
+            isVoter: data.isVoter || false,
+            isSoloParent: data.isSoloParent || false,
+            is4PsBeneficiary: data.is4PsBeneficiary || false,
+            occupation: data.occupation || '',
+            educationalAttainment: data.educationalAttainment || '',
+            incomeBracket: data.incomeBracket || ''
+          })
+
+          if (data.householdId) {
+            // Find in loaded households or wait until they load? We can just set a dummy object for the display
+            setSelectedHousehold({
+              id: data.householdId,
+              houseNumber: data.household?.houseNumber,
+              street: data.household?.street,
+              sitio: data.household?.sitio,
+              purok: data.household?.purok,
+              barangay: data.household?.barangay,
+              // Ideally we fetch the head from households list, but this works as fallback
+              residents: data.household?.residents || []
+            })
+          }
+
+          setInitialLoading(false)
+        })
+        .catch(err => {
+          console.error(err)
+          setInitialLoading(false)
+        })
+    }
+  }, [id])
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target
@@ -80,16 +145,12 @@ export default function CreateResident() {
         sitio: newValue.sitio || '',
         purok: newValue.purok || '',
         barangay: newValue.barangay || 'Barangay Poblacion',
-        isHeadOfFamily: false // Cannot be head if joining existing household
+        isHeadOfFamily: false
       }))
     } else {
       setFormData(prev => ({
         ...prev,
         householdId: '',
-        houseNumber: '',
-        street: '',
-        sitio: '',
-        purok: '',
         isHeadOfFamily: false
       }))
     }
@@ -99,32 +160,33 @@ export default function CreateResident() {
     e.preventDefault()
     setLoading(true)
 
-    // Send only necessary fields
     const payload = { ...formData }
     if (!payload.householdId) {
       delete (payload as any).householdId
     }
 
     try {
-      const res = await fetch('/api/residents', {
-        method: 'POST',
+      const res = await fetch(`/api/residents/${id}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
 
       if (res.ok) {
-        router.push('/residents')
+        router.push(`/residents/${id}`)
       } else {
-        const err = await res.json()
-        alert(err.message || 'Error creating resident')
+        const errorData = await res.json()
+        alert(errorData.message || 'Error updating resident')
       }
     } catch (error) {
       console.error(error)
-      alert('Error creating resident')
+      alert('Error updating resident')
     } finally {
       setLoading(false)
     }
   }
+
+  if (initialLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress /></Box>
 
   const isAddressDisabled = !!selectedHousehold
 
@@ -132,10 +194,10 @@ export default function CreateResident() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 5 }}>
         <Typography variant='h5'>
-          Add New Resident
+          Update Resident Info
         </Typography>
-        <Link href='/residents' passHref>
-          <Button variant='outlined'>Back</Button>
+        <Link href={`/residents/${id}`} passHref>
+          <Button variant='outlined'>Cancel</Button>
         </Link>
       </Box>
 
@@ -196,17 +258,17 @@ export default function CreateResident() {
                 <Autocomplete
                   options={households}
                   getOptionLabel={(option) => {
-                    const head = option.residents?.find((r: any) => r.firstName)
+                    const head = option.residents?.find((r: any) => r.isHeadOfFamily)
                     const headName = head ? `${head.firstName} ${head.lastName}` : 'No Head Assigned'
                     const address = [option.houseNumber, option.street, option.sitio, option.barangay].filter(Boolean).join(' ')
                     return `Household of ${headName} (${address})`
                   }}
                   value={selectedHousehold}
                   onChange={handleHouseholdChange}
-                  renderInput={(params) => <TextField {...params} label='Assign to Existing Household (Search by Head of Family or Address)' />}
+                  renderInput={(params) => <TextField {...params} label='Assign to Existing Household' />}
                 />
                 <Typography variant='caption' sx={{ mt: 1, display: 'block' }}>
-                  Leave this blank if you are creating a NEW household.
+                  If you choose a household above, this resident will join it. Leave blank to create or update their own household.
                 </Typography>
               </Grid>
 
@@ -299,7 +361,7 @@ export default function CreateResident() {
               
               <Grid item xs={12}>
                 <Button type='submit' variant='contained' size='large' disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Resident'}
+                  {loading ? 'Saving Changes...' : 'Save Changes'}
                 </Button>
               </Grid>
             </Grid>

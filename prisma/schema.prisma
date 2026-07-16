@@ -38,6 +38,14 @@ model Resident {
   isSenior        Boolean  @default(false)
   isPWD           Boolean  @default(false)
   isVoter         Boolean  @default(false)
+  isHeadOfFamily  Boolean  @default(false)
+  isSoloParent    Boolean  @default(false)
+  is4PsBeneficiary Boolean @default(false)
+  
+  occupation            Occupation?
+  educationalAttainment EducationalAttainment?
+  incomeBracket         IncomeBracket?
+
   household       Household @relation(fields: [householdId], references: [id])
   householdId     String
   documents       DocumentRequest[]
@@ -198,10 +206,35 @@ enum UserRole {
 
 enum BlotterStatus {
   OPEN
-  MEDIATION
+  ONGOING
   RESOLVED
   ESCALATED
   CLOSED
+}
+
+enum Occupation {
+  UNEMPLOYED
+  STUDENT
+  SELF_EMPLOYED
+  PRIVATE_EMPLOYEE
+  GOVERNMENT_EMPLOYEE
+  OTHERS
+}
+
+enum EducationalAttainment {
+  ELEMENTARY
+  HIGH_SCHOOL
+  VOCATIONAL
+  COLLEGE_GRADUATE
+  POST_GRADUATE
+  NONE
+}
+
+enum IncomeBracket {
+  BELOW_10K
+  FROM_10K_TO_20K
+  FROM_20K_TO_40K
+  ABOVE_40K
 }
 
 enum AnnouncementType {

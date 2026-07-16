@@ -3,7 +3,14 @@ import { ResidentInput } from 'src/lib/validations/resident.schema'
 
 export async function findAllResidents() {
   return await prisma.resident.findMany({
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    include: {
+      household: {
+        select: {
+          sitio: true
+        }
+      }
+    }
   })
 }
 
@@ -42,20 +49,101 @@ export async function createResidentRecord(data: ResidentInput, householdId: str
       isSenior: data.isSenior,
       isPWD: data.isPWD,
       isVoter: data.isVoter,
+      isHeadOfFamily: data.isHeadOfFamily || false,
+      isSoloParent: data.isSoloParent || false,
+      is4PsBeneficiary: data.is4PsBeneficiary || false,
+      occupation: data.occupation || null,
+      educationalAttainment: data.educationalAttainment || null,
+      incomeBracket: data.incomeBracket || null,
       householdId: householdId
     }
   })
 }
 
-export async function findOrCreateDefaultHousehold() {
-  let household = await prisma.household.findFirst()
+export async function updateResidentRecord(id: string, data: ResidentInput, householdId: string) {
+  return await prisma.resident.update({
+    where: { id },
+    data: {
+      firstName: data.firstName,
+      middleName: data.middleName || null,
+      lastName: data.lastName,
+      suffix: data.suffix || null,
+      birthDate: new Date(data.birthDate),
+      gender: data.gender,
+      civilStatus: data.civilStatus,
+      contactNumber: data.contactNumber || null,
+      email: data.email || null,
+      isIndigent: data.isIndigent,
+      isSenior: data.isSenior,
+      isPWD: data.isPWD,
+      isVoter: data.isVoter,
+      isHeadOfFamily: data.isHeadOfFamily,
+      isSoloParent: data.isSoloParent || false,
+      is4PsBeneficiary: data.is4PsBeneficiary || false,
+      occupation: data.occupation || null,
+      educationalAttainment: data.educationalAttainment || null,
+      incomeBracket: data.incomeBracket || null,
+      householdId: householdId
+    }
+  })
+}
+
+export async function createHousehold(data: { houseNumber?: string, street: string, sitio?: string, purok?: string, barangay: string }) {
+  return await prisma.household.create({
+    data: {
+      houseNumber: data.houseNumber || null,
+      street: data.street,
+      sitio: data.sitio || null,
+      purok: data.purok || null,
+      barangay: data.barangay
+    }
+  })
+}
+
+export async function findOrCreateHousehold(data: { houseNumber?: string, street: string, sitio?: string, purok?: string, barangay: string }) {
+  let household = await prisma.household.findFirst({
+    where: {
+      houseNumber: data.houseNumber || null,
+      street: data.street,
+      sitio: data.sitio || null,
+      purok: data.purok || null,
+      barangay: data.barangay
+    }
+  })
+
   if (!household) {
     household = await prisma.household.create({
       data: {
-        street: 'Default Street',
-        barangay: 'Default Barangay'
+        houseNumber: data.houseNumber || null,
+        street: data.street,
+        sitio: data.sitio || null,
+        purok: data.purok || null,
+        barangay: data.barangay
       }
     })
   }
   return household
+}
+
+export async function findResidentById(id: string) {
+  return await prisma.resident.findUnique({
+    where: { id },
+    include: {
+      household: {
+        include: {
+          residents: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              gender: true
+            }
+          }
+        }
+      },
+      documents: true,
+      blottersAsCom: true,
+      blottersAsRes: true
+    }
+  })
 }
