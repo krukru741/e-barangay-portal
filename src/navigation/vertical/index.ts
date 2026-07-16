@@ -11,6 +11,9 @@ import BullhornOutline from 'mdi-material-ui/BullhornOutline'
 import ChartPie from 'mdi-material-ui/ChartPie'
 import Finance from 'mdi-material-ui/Finance'
 import ScaleBalance from 'mdi-material-ui/ScaleBalance'
+import AccountTieOutline from 'mdi-material-ui/AccountTieOutline'
+import ShieldAccountOutline from 'mdi-material-ui/ShieldAccountOutline'
+import History from 'mdi-material-ui/History'
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
@@ -56,6 +59,24 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Transparency Board',
       icon: ScaleBalance,
       path: '/transparency'
+    },
+    {
+      title: 'Barangay Officials',
+      icon: AccountTieOutline,
+      path: '/officials'
+    },
+    {
+      sectionTitle: 'Admin Settings'
+    },
+    {
+      title: 'User Roles',
+      icon: ShieldAccountOutline,
+      path: '/admin/users'
+    },
+    {
+      title: 'Audit Logs',
+      icon: History,
+      path: '/admin/audit-logs'
     },
     {
       title: 'Account Settings',
