@@ -11,12 +11,17 @@ export default function DocumentPrintView() {
   const router = useRouter()
   const { id } = router.query
   const [documentData, setDocumentData] = useState<any>(null)
+  const [officials, setOfficials] = useState<any[]>([])
 
   useEffect(() => {
     if (id) {
       fetch(`/api/documents/${id}`)
         .then(res => res.json())
         .then(data => setDocumentData(data))
+      
+      fetch('/api/officials')
+        .then(res => res.json())
+        .then(data => setOfficials(Array.isArray(data) ? data : []))
     }
   }, [id])
 
@@ -36,18 +41,22 @@ export default function DocumentPrintView() {
     window.print()
   }
 
-  // Placeholder arrays for officials (can be swapped with DB fetch later)
-  const kagawads = [
-    "HON. ROMULO GOMEZ JR.",
-    "HON. DENNIS GOMEZ",
-    "HON. ANABELLA ADLAWAN",
-    "HON. LUCIA ECHAVEZ",
-    "HON. ROMEO BONGHANOY",
-    "HON. MARCIAL BREGONDO",
-    "HON. JEANETH KYAMKO"
-  ]
+  // Find active officials
+  const captain = officials.find(o => o.position === 'CAPTAIN' && o.isActive)
+  const treasurer = officials.find(o => o.position === 'TREASURER' && o.isActive)
+  const secretary = officials.find(o => o.position === 'SECRETARY' && o.isActive)
+  const skChair = officials.find(o => o.position === 'SK_CHAIR' && o.isActive)
+  const kagawads = officials.filter(o => o.position === 'KAGAWAD' && o.isActive)
 
-  const skChairman = "HON. JESSABEL B. ABASTAS"
+  const formatName = (res: any) => {
+    if (!res) return '___________________'
+    return `${res.firstName} ${res.middleName ? res.middleName.charAt(0) + '. ' : ''}${res.lastName}`.toUpperCase()
+  }
+
+  const captainName = formatName(captain?.resident)
+  const treasurerName = formatName(treasurer?.resident)
+  const secretaryName = formatName(secretary?.resident)
+  const skChairName = formatName(skChair?.resident)
 
   return (
     <Box sx={{ p: 4, maxWidth: '850px', margin: '0 auto', bgcolor: 'white', color: 'black', fontFamily: 'Arial, sans-serif' }}>
@@ -95,7 +104,7 @@ export default function DocumentPrintView() {
           <Typography sx={{ fontWeight: 'bold', textAlign: 'center', mb: 3 }}>BARANGAY OFFICIALS</Typography>
           
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>HON. ROWENA EDAR</Typography>
+            <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>HON. {captainName}</Typography>
             <Typography variant="caption" sx={{ display: 'block' }}>Punong Barangay</Typography>
           </Box>
 
@@ -104,20 +113,30 @@ export default function DocumentPrintView() {
           </Typography>
 
           <Box sx={{ textAlign: 'center', mb: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {kagawads.map((name, i) => (
-              <Typography key={i} variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{name}</Typography>
-            ))}
-            <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 1, fontSize: '0.85rem' }}>{skChairman}</Typography>
+            {kagawads.length > 0 ? (
+              kagawads.map((k, i) => (
+                <Typography key={i} variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+                  HON. {formatName(k.resident)}
+                </Typography>
+              ))
+            ) : (
+              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'gray' }}>No Kagawads found</Typography>
+            )}
+            {skChair && (
+              <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 1, fontSize: '0.85rem' }}>
+                HON. {skChairName}
+              </Typography>
+            )}
           </Box>
 
           <Box sx={{ textAlign: 'center', mb: 2 }}>
             <Typography sx={{ textDecoration: 'underline' }}>Barangay Treasurer</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 0.5, fontSize: '0.85rem' }}>ANNABELLE D. ABATAYO</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 0.5, fontSize: '0.85rem' }}>{treasurerName}</Typography>
           </Box>
 
           <Box sx={{ textAlign: 'center' }}>
             <Typography sx={{ textDecoration: 'underline' }}>Barangay Secretary</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 0.5, fontSize: '0.85rem' }}>MARIA JONALY LABITAD</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 0.5, fontSize: '0.85rem' }}>{secretaryName}</Typography>
           </Box>
         </Box>
 
@@ -130,7 +149,7 @@ export default function DocumentPrintView() {
               <Typography sx={{ textIndent: '40px', mb: 2, textAlign: 'justify' }}>
                 This is to certify that {titlePrefix} <strong>{fullName.toUpperCase()}</strong>, {age} years of age, 
                 is a bona fide resident of Sitio {sitio}, Purok {purok}, 
-                Barangay Camp 4, Talisay City, Cebu.
+                Barangay {resident.household?.barangay || '__________'}, Talisay City, Cebu.
               </Typography>
               <Typography sx={{ textIndent: '40px', mb: 2, textAlign: 'justify' }}>
                 This is to certify further that he/she is known to us personally as a person of good moral character 
@@ -147,7 +166,7 @@ export default function DocumentPrintView() {
           {type !== 'CLEARANCE' && (
             <Typography sx={{ textIndent: '40px', mb: 2, textAlign: 'justify' }}>
                This is to certify that {titlePrefix} <strong>{fullName.toUpperCase()}</strong>, {age} years of age, 
-               is a bona fide resident of Barangay Camp 4, Talisay City, Cebu. 
+               is a bona fide resident of Barangay {resident.household?.barangay || '__________'}, Talisay City, Cebu. 
                This certification is issued for <strong>{purpose.toUpperCase()}</strong>.
             </Typography>
           )}
@@ -214,20 +233,27 @@ export default function DocumentPrintView() {
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Typography variant="caption" sx={{ width: 80 }}>Issued at:</Typography>
-                  <Typography variant="caption" sx={{ borderBottom: '1px solid black', flex: 1 }}>CAMP 4, TALISAY CITY, CEBU</Typography>
+                  <Typography variant="caption" sx={{ borderBottom: '1px solid black', flex: 1 }}>
+                    BRGY. {resident.household?.barangay?.toUpperCase() || '__________'}, TALISAY CITY
+                  </Typography>
                 </Box>
               </Box>
               <Typography variant="body2" sx={{ fontStyle: 'italic' }}>Not valid without official seal.</Typography>
             </Box>
 
             <Box sx={{ textAlign: 'center', pb: 4 }}>
-              <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>HON. ROWENA EDAR</Typography>
+              <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>HON. {captainName}</Typography>
               <Typography variant="caption" sx={{ fontStyle: 'italic', display: 'block' }}>Barangay Captain</Typography>
             </Box>
           </Box>
 
         </Box>
       </Box>
+
+      {/* Watermark / Copyright */}
+      <Typography sx={{ textAlign: 'center', mt: 4, fontSize: '6pt', color: 'gray' }}>
+        Visits E-barangay Portal ©2026 - Alben Gacayan. All rights reserved
+      </Typography>
     </Box>
   )
 }
