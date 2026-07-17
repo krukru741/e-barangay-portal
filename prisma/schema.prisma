@@ -111,6 +111,7 @@ model Blotter {
   respondentId    String?
   respondentName  String?       // Used if Respondent is not a registered resident
   witnesses       String?       // Free text for witnesses
+  actionTaken     String?       // Narrative of action taken by the barangay
   hearings        Hearing[]
   filedAt         DateTime      @default(now())
   resolvedAt      DateTime?

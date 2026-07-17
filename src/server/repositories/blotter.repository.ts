@@ -20,8 +20,8 @@ export async function findBlotterById(id: string) {
   return await prisma.blotter.findUnique({
     where: { id },
     include: {
-      complainant: true,
-      respondent: true,
+      complainant: { include: { household: true } },
+      respondent: { include: { household: true } },
       hearings: {
         orderBy: { scheduledAt: 'desc' }
       }
@@ -42,6 +42,7 @@ export async function createBlotterRecord(data: BlotterInput) {
       respondentId: data.respondentId || null,
       respondentName: data.respondentName || null,
       witnesses: data.witnesses || null,
+      actionTaken: data.actionTaken || null,
       status: BlotterStatus.OPEN
     }
   })

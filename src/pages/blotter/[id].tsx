@@ -133,6 +133,14 @@ const BlotterDetailsPage = () => {
                 <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 2 }}>Narrative / Case Details</Typography>
                 <Typography sx={{ whiteSpace: 'pre-wrap' }}>{blotter.narrative}</Typography>
               </Grid>
+
+              {blotter.actionTaken && (
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 2 }}>Action Taken</Typography>
+                  <Typography sx={{ whiteSpace: 'pre-wrap' }}>{blotter.actionTaken}</Typography>
+                </Grid>
+              )}
             </Grid>
           </CardContent>
         </Card>

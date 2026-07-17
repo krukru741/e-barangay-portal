@@ -34,7 +34,8 @@ const FileBlotterPage = () => {
     complainantName: '',
     respondentId: '',
     respondentName: '',
-    witnesses: ''
+    witnesses: '',
+    actionTaken: ''
   })
 
   useEffect(() => {
@@ -183,6 +184,11 @@ const FileBlotterPage = () => {
                 {/* Narrative */}
                 <Grid item xs={12}>
                   <TextField fullWidth multiline rows={4} label='Incident Narrative' name="narrative" value={formData.narrative} onChange={handleChange} placeholder="Describe what happened in detail..." required />
+                </Grid>
+
+                {/* Action Taken */}
+                <Grid item xs={12}>
+                  <TextField fullWidth multiline rows={3} label='Action Taken' name="actionTaken" value={formData.actionTaken} onChange={handleChange} placeholder="Describe the action taken by the barangay..." />
                 </Grid>
 
                 <Grid item xs={12}>

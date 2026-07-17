@@ -11,6 +11,7 @@ export const blotterSchema = z.object({
   respondentId: z.string().optional(),
   respondentName: z.string().optional(),
   witnesses: z.string().optional(),
+  actionTaken: z.string().optional(),
 }).refine((data) => data.complainantId || data.complainantName, {
   message: "Either Complainant (Resident) or Complainant Name is required",
   path: ["complainantId"],

@@ -39,13 +39,38 @@ export default function BlotterPrintView() {
   const captainName = formatName(captain?.resident)
   const secretaryName = formatName(secretary?.resident)
 
-  const complainantName = blotter.complainant 
-    ? `${blotter.complainant.firstName} ${blotter.complainant.lastName}`.toUpperCase()
-    : (blotter.complainantName || '___________________').toUpperCase()
+  const getAge = (birthDate: string) => {
+    const today = new Date();
+    const bDate = new Date(birthDate);
+    let age = today.getFullYear() - bDate.getFullYear();
+    const m = today.getMonth() - bDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
-  const respondentName = blotter.respondent
-    ? `${blotter.respondent.firstName} ${blotter.respondent.lastName}`.toUpperCase()
-    : (blotter.respondentName || '___________________').toUpperCase()
+  const formatParty = (resident: any, nameStr: string) => {
+    if (resident) {
+      const name = `${resident.firstName} ${resident.middleName ? resident.middleName.charAt(0) + '. ' : ''}${resident.lastName}`.toUpperCase();
+      const age = getAge(resident.birthDate);
+      const civilStatus = resident.civilStatus.charAt(0).toUpperCase() + resident.civilStatus.slice(1).toLowerCase();
+      let address = '';
+      if (resident.household) {
+        address = [resident.household.purok, resident.household.sitio, `Barangay ${resident.household.barangay}`].filter(Boolean).join(', ');
+      }
+      return `${name}, ${age}, ${civilStatus}, ${address || 'Talisay City'}`;
+    }
+    return (nameStr || '___________________').toUpperCase();
+  };
+
+  const complainantDetails = formatParty(blotter.complainant, blotter.complainantName);
+  const respondentDetails = formatParty(blotter.respondent, blotter.respondentName);
+
+  const formatDateTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return `${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} | TIME: ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+  };
 
   const handlePrint = () => {
     window.print()
@@ -108,52 +133,59 @@ export default function BlotterPrintView() {
         </Typography>
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, px: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Document Control No: {blotter.blotterNumber}</Typography>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Date Filed: {new Date(blotter.filedAt).toLocaleDateString()}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>BARANGAY CASE NO.: {blotter.blotterNumber}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>DATE REPORTED: {formatDateTime(blotter.filedAt)}</Typography>
         </Box>
 
         <Box sx={{ border: '2px solid black', p: 4, mb: 4, bgcolor: 'rgba(255, 255, 255, 0.85)' }}>
           
           {/* Parties */}
-          <Box sx={{ display: 'flex', gap: 4, mb: 4 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>COMPLAINANT(S):</Typography>
-              <Typography sx={{ mt: 1, fontWeight: 'bold', fontSize: '1.1rem' }}>{complainantName}</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 4 }}>
+            <Box>
+              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Complainant: </Typography>
+              <Typography sx={{ display: 'inline' }}>{complainantDetails}</Typography>
             </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>RESPONDENT(S):</Typography>
-              <Typography sx={{ mt: 1, fontWeight: 'bold', fontSize: '1.1rem' }}>{respondentName}</Typography>
+            <Box>
+              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Respondent: </Typography>
+              <Typography sx={{ display: 'inline' }}>{respondentDetails}</Typography>
             </Box>
           </Box>
 
           {/* Incident Info */}
-          <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Nature of Blotter: </Typography>
-              <Typography sx={{ display: 'inline', textTransform: 'uppercase' }}>Alleged {blotter.incidentType}</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 4 }}>
+            <Box>
+              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Type of Incident: </Typography>
+              <Typography sx={{ display: 'inline' }}>{blotter.incidentType}</Typography>
             </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Incident Date/Time: </Typography>
-              <Typography sx={{ display: 'inline' }}>{new Date(blotter.incidentDate).toLocaleString()}</Typography>
+            <Box>
+              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Date & Time of Incident: </Typography>
+              <Typography sx={{ display: 'inline' }}>{formatDateTime(blotter.incidentDate)}</Typography>
             </Box>
-          </Box>
-
-          <Box sx={{ mb: 4 }}>
-            <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Location of Incident: </Typography>
-            <Typography sx={{ display: 'inline' }}>{blotter.location}</Typography>
+            <Box>
+              <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Place of Occurrence: </Typography>
+              <Typography sx={{ display: 'inline' }}>{blotter.location}</Typography>
+            </Box>
           </Box>
 
           {/* Witnesses */}
           <Box sx={{ mb: 4 }}>
-            <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>WITNESS(ES):</Typography>
-            <Typography sx={{ mt: 1 }}>{blotter.witnesses || 'None'}</Typography>
+            <Typography sx={{ fontWeight: 'bold', display: 'inline' }}>Witness(es): </Typography>
+            <Typography sx={{ display: 'inline' }}>{blotter.witnesses || 'None'}</Typography>
           </Box>
 
           {/* Narrative */}
           <Box sx={{ mb: 4 }}>
-            <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline', mb: 2 }}>INCIDENT NARRATIVE:</Typography>
-            <Typography sx={{ whiteSpace: 'pre-wrap', textAlign: 'justify', lineHeight: 1.6, minHeight: '150px' }}>
+            <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline', mb: 1 }}>Narrative:</Typography>
+            <Typography sx={{ whiteSpace: 'pre-wrap', textAlign: 'justify', lineHeight: 1.6, minHeight: '100px' }}>
               {blotter.narrative}
+            </Typography>
+          </Box>
+
+          {/* Action Taken */}
+          <Box sx={{ mb: 4 }}>
+            <Typography sx={{ fontWeight: 'bold', textDecoration: 'underline', mb: 1 }}>Action Taken:</Typography>
+            <Typography sx={{ whiteSpace: 'pre-wrap', textAlign: 'justify', lineHeight: 1.6, minHeight: '50px' }}>
+              {blotter.actionTaken || 'None recorded.'}
             </Typography>
           </Box>
 
@@ -202,8 +234,8 @@ export default function BlotterPrintView() {
           
           <Box sx={{ textAlign: 'center', width: '250px' }}>
             <Typography sx={{ borderBottom: '1px solid black', height: '20px' }}></Typography>
-            <Typography sx={{ fontWeight: 'bold' }}>Assigned Desk Officer</Typography>
-            <Typography variant="caption" sx={{ fontStyle: 'italic', display: 'block' }}>Signature over printed name / Date</Typography>
+            <Typography sx={{ fontWeight: 'bold' }}>HON. {secretaryName}</Typography>
+            <Typography variant="caption" sx={{ fontStyle: 'italic', display: 'block' }}>Barangay Secretary</Typography>
           </Box>
 
           <Box sx={{ textAlign: 'center', width: '250px' }}>
