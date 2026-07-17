@@ -6,7 +6,7 @@ import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import { ReactNode } from 'react'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-import QRCode from 'qrcode.react'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function BlotterPrintView() {
   const router = useRouter()
@@ -215,7 +215,7 @@ export default function BlotterPrintView() {
         {/* QR Code and Meta */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 8 }}>
           <Box>
-            <QRCode value={`VERIFY-BLOTTER:${blotter.id}`} size={80} />
+            <QRCodeSVG value={`VERIFY-BLOTTER:${blotter.id}`} size={80} />
             <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'gray' }}>Scan to Verify</Typography>
           </Box>
           <Typography sx={{ textAlign: 'right', fontSize: '7pt', color: 'gray' }}>
