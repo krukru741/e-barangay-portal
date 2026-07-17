@@ -38,6 +38,7 @@ export default function CreateResident() {
     handleCityChange,
     getProvCodeByName,
     getMunCodeByName,
+    getPostalCode,
   } = usePhilAddress('0722', '') // 0722 = Cebu default
 
   const router = useRouter()
@@ -388,7 +389,8 @@ export default function CreateResident() {
                   value={cities.find(c => c.mun_code === selectedMunCode) || null}
                   onChange={(_, v) => {
                     handleCityChange(v?.mun_code || '')
-                    setFormData(prev => ({ ...prev, city: v ? toTitleCase(v.name) : '', barangay: '' }))
+                    const auto = v ? getPostalCode(v.mun_code) : ''
+                    setFormData(prev => ({ ...prev, city: v ? toTitleCase(v.name) : '', barangay: '', postalCode: auto || prev.postalCode }))
                   }}
                   disabled={isAddressDisabled || !selectedProvCode}
                   renderInput={(params) => <TextField {...params} label='City / Municipality *' />}
@@ -407,7 +409,15 @@ export default function CreateResident() {
               </Grid>
               {/* --- Postal Code & Country --- */}
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label='Postal Code' name='postalCode' value={formData.postalCode} onChange={handleChange} disabled={isAddressDisabled} />
+                <TextField
+                  fullWidth
+                  label='Postal Code'
+                  name='postalCode'
+                  value={formData.postalCode}
+                  onChange={handleChange}
+                  disabled={isAddressDisabled}
+                  helperText={selectedMunCode && !getPostalCode(selectedMunCode) ? 'Not found in lookup — type manually' : selectedMunCode ? '✓ Auto-filled from city' : ''}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth label='Country' name='country' value={formData.country} onChange={handleChange} required disabled={isAddressDisabled} />

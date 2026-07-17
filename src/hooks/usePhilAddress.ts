@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useMemo, useState } from 'react'
 import phil from 'phil-reg-prov-mun-brgy'
+import { getPostalCode } from 'src/utils/postalCodes'
 
 /**
  * Custom hook for Philippine cascading address dropdowns.
@@ -84,6 +85,7 @@ export function usePhilAddress(
     getCityName,
     getProvCodeByName,
     getMunCodeByName,
+    getPostalCode,
   }
 }
 
