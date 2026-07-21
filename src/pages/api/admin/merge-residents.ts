@@ -8,11 +8,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 
-  const session = await getSession({ req })
-  if (!session || (session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN') {
-    return res.status(403).json({ error: 'Forbidden. Admin privileges required.' })
-  }
-
   const { sourceId, targetId } = req.body
 
   if (!sourceId || !targetId) {
