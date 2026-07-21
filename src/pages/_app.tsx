@@ -66,9 +66,9 @@ const App = (props: ExtendedAppProps) => {
           <title>{`${themeConfig.templateName} - Admin Portal`}</title>
         <meta
           name='description'
-          content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
+          content={`${themeConfig.templateName} - A comprehensive barangay management system for efficiently managing residents, documents, blotters, and public information.`}
         />
-        <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+        <meta name='keywords' content='Barangay Management System, E-Barangay, Portal, Next.js' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
 
