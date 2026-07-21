@@ -1,32 +1,17 @@
-// ** React Imports
-import { useState, ElementType, ChangeEvent, SyntheticEvent } from 'react'
-
-// ** MUI Imports
+import { useState, useEffect, ElementType, ChangeEvent } from 'react'
+import { useSession } from 'next-auth/react'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import Link from '@mui/material/Link'
 import Alert from '@mui/material/Alert'
-import Select from '@mui/material/Select'
-import { styled } from '@mui/material/styles'
-import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import InputLabel from '@mui/material/InputLabel'
-import AlertTitle from '@mui/material/AlertTitle'
-import IconButton from '@mui/material/IconButton'
 import CardContent from '@mui/material/CardContent'
-import FormControl from '@mui/material/FormControl'
 import Button, { ButtonProps } from '@mui/material/Button'
-
-// ** Icons Imports
-import Close from 'mdi-material-ui/Close'
-
-const ImgStyled = styled('img')(({ theme }) => ({
-  width: 120,
-  height: 120,
-  marginRight: theme.spacing(6.25),
-  borderRadius: theme.shape.borderRadius
-}))
+import Avatar from '@mui/material/Avatar'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import { styled } from '@mui/material/styles'
+import AccountCircleOutline from 'mdi-material-ui/AccountCircleOutline'
 
 const ButtonStyled = styled(Button)<ButtonProps & { component?: ElementType; htmlFor?: string }>(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
@@ -35,129 +20,194 @@ const ButtonStyled = styled(Button)<ButtonProps & { component?: ElementType; htm
   }
 }))
 
-const ResetButtonStyled = styled(Button)<ButtonProps>(({ theme }) => ({
-  marginLeft: theme.spacing(4.5),
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    marginLeft: 0,
-    textAlign: 'center',
-    marginTop: theme.spacing(4)
-  }
-}))
+const roleColorMap: any = {
+  SUPER_ADMIN: 'error',
+  ADMIN: 'warning',
+  STAFF: 'info',
+  OFFICIAL: 'primary',
+  RESIDENT: 'default'
+}
 
 const TabAccount = () => {
-  // ** State
-  const [openAlert, setOpenAlert] = useState<boolean>(true)
-  const [imgSrc, setImgSrc] = useState<string>('/images/avatars/1.png')
+  const { data: session, update: updateSession } = useSession()
+  const [profile, setProfile] = useState({ name: '', email: '', image: '' })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [success, setSuccess] = useState('')
+  const [error, setError] = useState('')
 
-  const onChange = (file: ChangeEvent) => {
-    const reader = new FileReader()
-    const { files } = file.target as HTMLInputElement
-    if (files && files.length !== 0) {
-      reader.onload = () => setImgSrc(reader.result as string)
+  const userRole = (session?.user as any)?.role || 'RESIDENT'
 
-      reader.readAsDataURL(files[0])
+  useEffect(() => {
+    if (session) {
+      fetch('/api/user/profile')
+        .then(r => r.json())
+        .then(data => {
+          setProfile({
+            name: data.name || '',
+            email: data.email || '',
+            image: data.image || ''
+          })
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    }
+  }, [session])
+
+  const handleSave = async () => {
+    setSaving(true)
+    setSuccess('')
+    setError('')
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile)
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setSuccess('Profile updated successfully!')
+        // Update the session so the name shows in the navbar
+        await updateSession({ name: data.name, email: data.email, image: data.image })
+        setTimeout(() => setSuccess(''), 4000)
+      } else {
+        setError(data.error || 'Failed to update profile')
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
+    }
+    setSaving(false)
+  }
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = () => setProfile(p => ({ ...p, image: reader.result as string }))
+      reader.readAsDataURL(file)
     }
   }
 
+  if (loading) return (
+    <CardContent sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+      <CircularProgress />
+    </CardContent>
+  )
+
   return (
     <CardContent>
-      <form>
-        <Grid container spacing={7}>
-          <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <ImgStyled src={imgSrc} alt='Profile Pic' />
-              <Box>
-                <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload New Photo
-                  <input
-                    hidden
-                    type='file'
-                    onChange={onChange}
-                    accept='image/png, image/jpeg'
-                    id='account-settings-upload-image'
-                  />
-                </ButtonStyled>
-                <ResetButtonStyled color='error' variant='outlined' onClick={() => setImgSrc('/images/avatars/1.png')}>
-                  Reset
-                </ResetButtonStyled>
-                <Typography variant='body2' sx={{ marginTop: 5 }}>
-                  Allowed PNG or JPEG. Max size of 800K.
-                </Typography>
+      <Grid container spacing={6}>
+        {/* Avatar section */}
+        <Grid item xs={12} sx={{ mt: 2, mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Avatar
+              src={profile.image}
+              sx={{ width: 100, height: 100, border: '3px solid #e0e0e0', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+            >
+              <AccountCircleOutline sx={{ fontSize: 60 }} />
+            </Avatar>
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                <Typography variant='h6' sx={{ fontWeight: 700 }}>{profile.name || 'My Account'}</Typography>
+                <Chip label={userRole} color={roleColorMap[userRole]} size='small' sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
               </Box>
+              <Typography variant='body2' color='textSecondary' sx={{ mb: 2 }}>{profile.email}</Typography>
+              <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image' size='small'>
+                Upload New Photo
+                <input hidden type='file' onChange={handleImageChange} accept='image/png, image/jpeg' id='account-settings-upload-image' />
+              </ButtonStyled>
+              <Button size='small' color='secondary' variant='outlined' sx={{ ml: 2 }} onClick={() => setProfile(p => ({ ...p, image: '' }))}>
+                Reset
+              </Button>
+              <Typography variant='caption' display='block' sx={{ mt: 1, color: 'text.secondary' }}>
+                Allowed: PNG or JPEG. Max 2MB.
+              </Typography>
             </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Username' placeholder='johnDoe' defaultValue='johnDoe' />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Name' placeholder='John Doe' defaultValue='John Doe' />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              type='email'
-              label='Email'
-              placeholder='johnDoe@example.com'
-              defaultValue='johnDoe@example.com'
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select label='Role' defaultValue='admin'>
-                <MenuItem value='admin'>Admin</MenuItem>
-                <MenuItem value='author'>Author</MenuItem>
-                <MenuItem value='editor'>Editor</MenuItem>
-                <MenuItem value='maintainer'>Maintainer</MenuItem>
-                <MenuItem value='subscriber'>Subscriber</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select label='Status' defaultValue='active'>
-                <MenuItem value='active'>Active</MenuItem>
-                <MenuItem value='inactive'>Inactive</MenuItem>
-                <MenuItem value='pending'>Pending</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Company' placeholder='ABC Pvt. Ltd.' defaultValue='ABC Pvt. Ltd.' />
-          </Grid>
-
-          {openAlert ? (
-            <Grid item xs={12} sx={{ mb: 3 }}>
-              <Alert
-                severity='warning'
-                sx={{ '& a': { fontWeight: 400 } }}
-                action={
-                  <IconButton size='small' color='inherit' aria-label='close' onClick={() => setOpenAlert(false)}>
-                    <Close fontSize='inherit' />
-                  </IconButton>
-                }
-              >
-                <AlertTitle>Your email is not confirmed. Please check your inbox.</AlertTitle>
-                <Link href='/' onClick={(e: SyntheticEvent) => e.preventDefault()}>
-                  Resend Confirmation
-                </Link>
-              </Alert>
-            </Grid>
-          ) : null}
-
-          <Grid item xs={12}>
-            <Button variant='contained' sx={{ marginRight: 3.5 }}>
-              Save Changes
-            </Button>
-            <Button type='reset' variant='outlined' color='secondary'>
-              Reset
-            </Button>
-          </Grid>
+          </Box>
         </Grid>
-      </form>
+
+        {success && (
+          <Grid item xs={12}>
+            <Alert severity='success'>{success}</Alert>
+          </Grid>
+        )}
+        {error && (
+          <Grid item xs={12}>
+            <Alert severity='error'>{error}</Alert>
+          </Grid>
+        )}
+
+        {/* Form Fields */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            required
+            label='Full Name'
+            value={profile.name}
+            onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
+            placeholder='e.g. Juan dela Cruz'
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            required
+            type='email'
+            label='Email Address'
+            value={profile.email}
+            onChange={e => setProfile(p => ({ ...p, email: e.target.value }))}
+            placeholder='e.g. juan@gmail.com'
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label='Role'
+            value={userRole}
+            disabled
+            helperText='Role is managed by your administrator'
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label='Profile Photo URL'
+            value={profile.image}
+            onChange={e => setProfile(p => ({ ...p, image: e.target.value }))}
+            placeholder='https://... (optional)'
+            helperText='Or use the Upload button above'
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Button
+            variant='contained'
+            onClick={handleSave}
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={16} color='inherit' /> : undefined}
+            sx={{ mr: 3, boxShadow: '0 4px 12px 0 rgba(102,108,255,0.4)' }}
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+          <Button
+            variant='outlined'
+            color='secondary'
+            onClick={() => {
+              setError('')
+              setSuccess('')
+              if (session?.user) {
+                setProfile({
+                  name: (session.user as any).name || '',
+                  email: (session.user as any).email || '',
+                  image: (session.user as any).image || ''
+                })
+              }
+            }}
+          >
+            Reset
+          </Button>
+        </Grid>
+      </Grid>
     </CardContent>
   )
 }
