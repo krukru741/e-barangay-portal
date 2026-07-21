@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from 'next-auth/react'
-import { prisma } from 'src/server/db/client'
+import { prisma } from 'src/lib/db'
 import levenshtein from 'fast-levenshtein'
 
 function getDynamicThreshold(name: string): number {

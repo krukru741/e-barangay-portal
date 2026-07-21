@@ -88,7 +88,10 @@ export default function CreateResident() {
   useEffect(() => {
     fetch('/api/households')
       .then(res => res.json())
-      .then(data => setHouseholds(data))
+      .then(data => {
+        if (Array.isArray(data)) setHouseholds(data)
+        else setHouseholds([])
+      })
       .catch(console.error)
   }, [])
 
@@ -335,7 +338,7 @@ export default function CreateResident() {
               
               <Grid item xs={12}>
                 <Autocomplete
-                  options={households}
+                  options={Array.isArray(households) ? households : []}
                   getOptionLabel={(option) => {
                     // Get head of family (from the API filtered residents)
                     const head = option.residents?.find((r: any) => r.isHeadOfFamily)
