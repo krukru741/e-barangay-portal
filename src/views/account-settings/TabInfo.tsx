@@ -22,22 +22,15 @@ const TabInfo = () => {
   const userId = (session?.user as any)?.id
 
   useEffect(() => {
-    if (!userId) return
-    // Try to find the resident record linked to this user account
-    fetch(`/api/residents?userId=${userId}`)
+    if (!session) return
+    fetch('/api/user/resident')
       .then(r => r.json())
       .then(data => {
-        // data might be an array - find the one linked to this user
-        if (Array.isArray(data)) {
-          const linked = data.find((r: any) => r.userId === userId)
-          setResident(linked || null)
-        } else if (data && !data.error) {
-          setResident(data)
-        }
+        if (data && !data.error) setResident(data)
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [userId])
+  }, [session])
 
   const formatDate = (date: string | null) => {
     if (!date) return '—'
