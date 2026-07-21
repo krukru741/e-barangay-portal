@@ -59,6 +59,11 @@ model Resident {
   officials       Official[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  
+  // Merge and Soft Delete Tracking
+  isMerged        Boolean  @default(false)
+  mergedToId      String?
+  deletedAt       DateTime?
 }
 
 model User {

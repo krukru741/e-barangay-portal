@@ -47,6 +47,9 @@ export default function CreateResident() {
   const [selectedHousehold, setSelectedHousehold] = useState<any | null>(null)
   const [cameraOpen, setCameraOpen] = useState(false)
   const webcamRef = useRef<Webcam>(null)
+  
+  const [duplicateWarningOpen, setDuplicateWarningOpen] = useState(false)
+  const [duplicatesFound, setDuplicatesFound] = useState<any[]>([])
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -145,6 +148,34 @@ export default function CreateResident() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
+    try {
+      const checkRes = await fetch('/api/residents/check-duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          birthDate: formData.birthDate
+        })
+      })
+      const checkData = await checkRes.json()
+      if (checkData.hasDuplicates) {
+        setDuplicatesFound(checkData.duplicates)
+        setDuplicateWarningOpen(true)
+        setLoading(false)
+        return
+      }
+    } catch (err) {
+      console.error('Error checking for duplicates', err)
+    }
+
+    await saveResident()
+  }
+
+  const saveResident = async () => {
+    setLoading(true)
+    setDuplicateWarningOpen(false)
 
     // Send only necessary fields
     const payload = { ...formData }
@@ -522,6 +553,29 @@ export default function CreateResident() {
         <DialogActions sx={{ p: 3, pt: 0 }}>
           <Button onClick={() => setCameraOpen(false)} color="inherit">Cancel</Button>
           <Button onClick={handleCapture} variant="contained" color="primary">Capture</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Duplicate Warning Dialog */}
+      <Dialog open={duplicateWarningOpen} onClose={() => setDuplicateWarningOpen(false)}>
+        <DialogTitle sx={{ color: 'error.main' }}>Potential Duplicate Found</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 4 }}>
+            We found existing records with the exact same birthdate and very similar names. Please review them before proceeding to avoid duplicating records:
+          </Typography>
+          {duplicatesFound.map((dup, i) => (
+            <Box key={i} sx={{ mb: 2, p: 3, border: '1px solid #ffcc00', borderRadius: 1, bgcolor: '#fffdf5' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{dup.firstName} {dup.lastName}</Typography>
+              <Typography variant="body2">Birthdate: {new Date(dup.birthDate).toLocaleDateString()}</Typography>
+            </Box>
+          ))}
+          <Typography variant="body2" sx={{ mt: 4, fontWeight: 'bold' }}>
+            Are you sure you want to register this person anyway?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDuplicateWarningOpen(false)} color="secondary">Cancel</Button>
+          <Button onClick={saveResident} variant="contained" color="error">Proceed Anyway</Button>
         </DialogActions>
       </Dialog>
     </Box>

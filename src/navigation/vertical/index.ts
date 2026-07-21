@@ -18,6 +18,7 @@ import History from 'mdi-material-ui/History'
 import CogOutline from 'mdi-material-ui/CogOutline'
 import FileCodeOutline from 'mdi-material-ui/FileCodeOutline'
 import DatabaseExportOutline from 'mdi-material-ui/DatabaseExportOutline'
+import AccountSwitchOutline from 'mdi-material-ui/AccountSwitchOutline'
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
@@ -126,11 +127,18 @@ const navigation = (role: string = 'RESIDENT'): VerticalNavItemsType => {
 
   // Manage Users (Admin and SuperAdmin)
   if (isAdmin) {
-    items.push({
-      title: 'User Roles',
-      icon: ShieldAccountOutline,
-      path: '/admin/users'
-    })
+    items.push(
+      {
+        title: 'User Roles',
+        icon: ShieldAccountOutline,
+        path: '/admin/users'
+      },
+      {
+        title: 'Merge Residents',
+        icon: AccountSwitchOutline,
+        path: '/admin/merge-residents'
+      }
+    )
   }
 
   // System Settings (Super Admin ONLY)
