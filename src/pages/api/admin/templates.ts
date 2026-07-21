@@ -92,14 +92,9 @@ const DEFAULT_TEMPLATES: Record<string, string> = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const session = await getServerSession(req, res, authOptions)
-    if (!session || !['SUPER_ADMIN', 'ADMIN'].includes((session.user as any)?.role)) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-
     if (req.method === 'GET') {
+      // Public read - print view needs templates without requiring login
       const templates = await prisma.documentTemplate.findMany()
-      // Return defaults merged with saved
       const result = Object.keys(DEFAULT_TEMPLATES).map(type => {
         const saved = templates.find(t => t.type === type)
         return {
@@ -110,6 +105,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
       return res.status(200).json(result)
+    }
+
+    // Protect PUT - admin only
+    const session = await getServerSession(req, res, authOptions)
+    if (!session || !['SUPER_ADMIN', 'ADMIN'].includes((session.user as any)?.role)) {
+      return res.status(401).json({ error: 'Unauthorized' })
     }
 
     if (req.method === 'PUT') {

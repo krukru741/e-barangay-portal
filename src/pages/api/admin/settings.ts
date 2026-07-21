@@ -5,20 +5,19 @@ import { prisma } from 'src/lib/db'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    if (req.method === 'GET') {
+      // Public read - allows print view to load barangay settings without login check
+      let settings = await prisma.systemSettings.findFirst()
+      if (!settings) {
+        settings = await prisma.systemSettings.create({ data: {} })
+      }
+      return res.status(200).json(settings)
+    }
+
+    // Protect PUT route (only admin can change settings)
     const session = await getServerSession(req, res, authOptions)
     if (!session || !['SUPER_ADMIN', 'ADMIN'].includes((session.user as any)?.role)) {
       return res.status(401).json({ error: 'Unauthorized' })
-    }
-
-    if (req.method === 'GET') {
-      let settings = await prisma.systemSettings.findFirst()
-      if (!settings) {
-        // Create default if none exists
-        settings = await prisma.systemSettings.create({
-          data: {}
-        })
-      }
-      return res.status(200).json(settings)
     }
 
     if (req.method === 'PUT') {

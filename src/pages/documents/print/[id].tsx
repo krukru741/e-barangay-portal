@@ -12,16 +12,35 @@ export default function DocumentPrintView() {
   const { id } = router.query
   const [documentData, setDocumentData] = useState<any>(null)
   const [officials, setOfficials] = useState<any[]>([])
+  const [settings, setSettings] = useState<any>({
+    barangayName: 'Barangay',
+    cityMunicipality: 'City',
+    province: 'Province',
+    logoUrl: ''
+  })
+  const [template, setTemplate] = useState<any>(null)
 
   useEffect(() => {
     if (id) {
-      fetch(`/api/documents/${id}`)
-        .then(res => res.json())
-        .then(data => setDocumentData(data))
-      
-      fetch('/api/officials')
-        .then(res => res.json())
-        .then(data => setOfficials(Array.isArray(data) ? data : []))
+      Promise.all([
+        fetch(`/api/documents/${id}`).then(r => r.json()),
+        fetch('/api/officials').then(r => r.json()),
+        fetch('/api/admin/settings').then(r => r.ok ? r.json() : null).catch(() => null),
+      ]).then(([docData, offs, sett]) => {
+        setDocumentData(docData)
+        setOfficials(Array.isArray(offs) ? offs : [])
+        if (sett) setSettings(sett)
+        // Fetch template for this doc type after we know the type
+        if (docData?.type) {
+          fetch('/api/admin/templates')
+            .then(r => r.json())
+            .then((temps: any[]) => {
+              const found = temps.find(t => t.type === docData.type)
+              if (found) setTemplate(found)
+            })
+            .catch(() => null)
+        }
+      })
     }
   }, [id])
 
@@ -137,22 +156,26 @@ export default function DocumentPrintView() {
 
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, pb: 2 }}>
-        {/* Left Logo Placehoder */}
-        <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Typography variant="caption">CITY LOGO</Typography>
+        {/* Left Logo */}
+        <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          {settings.logoUrl ? (
+            <img src={settings.logoUrl} alt="Barangay Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          ) : (
+            <Typography variant="caption">BRGY LOGO</Typography>
+          )}
         </Box>
 
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body1">Republic of the Philippines</Typography>
-          <Typography variant="body1">Province of Cebu</Typography>
-          <Typography variant="body1">TALISAY CITY</Typography>
-          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Barangay Camp 4</Typography>
+          <Typography variant="body1">Province of {settings.province}</Typography>
+          <Typography variant="body1">{settings.cityMunicipality?.toUpperCase()}</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{settings.barangayName?.toUpperCase()}</Typography>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>OFFICE OF THE BARANGAY CAPTAIN</Typography>
         </Box>
 
-        {/* Right Logo Placehoder */}
+        {/* Right Logo */}
         <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Typography variant="caption">BRGY LOGO</Typography>
+          <Typography variant="caption">CITY LOGO</Typography>
         </Box>
       </Box>
 
