@@ -1,5 +1,5 @@
 // ** React Import
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 
 // ** Next Import
 import Link from 'next/link'
@@ -53,6 +53,18 @@ const VerticalNavHeader = (props: Props) => {
 
   // ** Hooks
   const theme = useTheme()
+  const [logo, setLogo] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.logoUrl) {
+          setLogo(data.logoUrl)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <MenuHeaderWrapper className='nav-header' sx={{ pl: 6 }}>
@@ -61,7 +73,10 @@ const VerticalNavHeader = (props: Props) => {
       ) : (
         <Link href='/' passHref>
           <StyledLink>
-            <svg
+            {logo ? (
+              <img src={logo} alt="Barangay Logo" style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: '50%' }} />
+            ) : (
+              <svg
               width={30}
               height={25}
               version='1.1'
@@ -120,6 +135,7 @@ const VerticalNavHeader = (props: Props) => {
                 </g>
               </g>
             </svg>
+            )}
             <HeaderTitle variant='h6' sx={{ ml: 3 }}>
               {themeConfig.templateName}
             </HeaderTitle>
