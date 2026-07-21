@@ -22,19 +22,18 @@ import DatabaseExportOutline from 'mdi-material-ui/DatabaseExportOutline'
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 
-// Role-based access matrix
+// Role-based access matrix from implementation_plan.md
 // SUPER_ADMIN: everything
-// ADMIN: everything except Backup & Restore, User Roles (SUPER_ADMIN only)
-// STAFF: Residents, Documents, Blotter, Announcements, Officials, Transparency, Dashboard, Account Settings
-// OFFICIAL: Dashboard, Announcements, Officials, Transparency, Account Settings
-// RESIDENT: Dashboard, Announcements, Transparency, Officials, Account Settings
+// ADMIN: Manage Users, Manage Residents, Issue Docs, Manage Blotters, View Reports, Manage Announcements
+// STAFF: Manage Residents, Issue Docs, Manage Blotters, View Reports, Manage Announcements
+// OFFICIAL: View Reports, View Announcements, File Blotter, View Own Docs
+// RESIDENT: View Announcements, File Blotter, View Own Docs
 
 const navigation = (role: string = 'RESIDENT'): VerticalNavItemsType => {
   const isSuperAdmin = role === 'SUPER_ADMIN'
   const isAdmin = role === 'ADMIN' || isSuperAdmin
   const isStaff = role === 'STAFF' || isAdmin
   const isOfficial = role === 'OFFICIAL' || isStaff
-  // All roles get these base items
 
   const items: VerticalNavItemsType = [
     {
@@ -42,11 +41,52 @@ const navigation = (role: string = 'RESIDENT'): VerticalNavItemsType => {
       icon: HomeOutline,
       path: '/'
     },
+    {
+      title: 'Announcements',
+      icon: BullhornOutline,
+      path: '/announcements'
+    },
+    {
+      title: 'Transparency Board',
+      icon: ScaleBalance,
+      path: '/transparency'
+    },
+    {
+      title: 'Barangay Officials',
+      icon: AccountTieOutline,
+      path: '/officials'
+    },
   ]
 
-  // Staff and above
+  // Residents and Officials (Personal actions)
+  if (!isStaff) {
+    items.push(
+      {
+        title: 'My Documents',
+        icon: FileDocumentOutline,
+        path: '/my-documents'
+      },
+      {
+        title: 'File a Blotter',
+        icon: LockOutline,
+        path: '/file-blotter'
+      }
+    )
+  }
+
+  // Analytics & Reports (Official and up)
+  if (isOfficial) {
+    items.push({
+      title: 'Analytics & Reports',
+      icon: ChartPie,
+      path: '/analytics'
+    })
+  }
+
+  // Core Management (Staff and up)
   if (isStaff) {
     items.push(
+      { sectionTitle: 'Management' } as any,
       {
         title: 'Residents',
         icon: AccountGroupOutline,
@@ -66,75 +106,36 @@ const navigation = (role: string = 'RESIDENT'): VerticalNavItemsType => {
         title: 'Blotter Records',
         icon: LockOutline,
         path: '/blotter'
-      },
+      }
     )
   }
 
-  // Official and above
-  if (isOfficial) {
-    items.push(
-      {
-        title: 'Announcements',
-        icon: BullhornOutline,
-        path: '/announcements'
-      },
-    )
-  }
-
-  // Staff and above get Analytics
-  if (isStaff) {
-    items.push(
-      {
-        title: 'Analytics & Reports',
-        icon: ChartPie,
-        path: '/analytics'
-      },
-    )
-  }
-
-  // Admin and above get Finance Management
+  // Finance Management (Admin and up - Phase 2 optional but included for Admin)
   if (isAdmin) {
-    items.push(
-      {
-        title: 'Finance Mgmt',
-        icon: Finance,
-        path: '/finance'
-      },
-    )
+    items.push({
+      title: 'Finance Mgmt',
+      icon: Finance,
+      path: '/finance'
+    })
   }
 
-  // All roles can see Transparency Board (public info) and Officials
-  items.push(
-    {
-      title: 'Transparency Board',
-      icon: ScaleBalance,
-      path: '/transparency'
-    },
-    {
-      title: 'Barangay Officials',
-      icon: AccountTieOutline,
-      path: '/officials'
-    },
-  )
+  // Admin Settings section
+  if (isAdmin || isSuperAdmin) {
+    items.push({ sectionTitle: 'System Admin' } as any)
+  }
 
-  // Admin Settings section — Admin and above
+  // Manage Users (Admin and SuperAdmin)
   if (isAdmin) {
-    items.push({ sectionTitle: 'Admin Settings' } as any)
+    items.push({
+      title: 'User Roles',
+      icon: ShieldAccountOutline,
+      path: '/admin/users'
+    })
+  }
 
-    if (isSuperAdmin) {
-      items.push({
-        title: 'User Roles',
-        icon: ShieldAccountOutline,
-        path: '/admin/users'
-      })
-    }
-
+  // System Settings (Super Admin ONLY)
+  if (isSuperAdmin) {
     items.push(
-      {
-        title: 'Audit Logs',
-        icon: History,
-        path: '/admin/audit-logs'
-      },
       {
         title: 'System Settings',
         icon: CogOutline,
@@ -145,23 +146,28 @@ const navigation = (role: string = 'RESIDENT'): VerticalNavItemsType => {
         icon: FileCodeOutline,
         path: '/admin/templates'
       },
-    )
-
-    if (isSuperAdmin) {
-      items.push({
+      {
+        title: 'Audit Logs',
+        icon: History,
+        path: '/admin/audit-logs'
+      },
+      {
         title: 'Backup & Restore',
         icon: DatabaseExportOutline,
         path: '/admin/backup'
-      })
-    }
+      }
+    )
   }
 
   // Account Settings — all roles
-  items.push({
-    title: 'Account Settings',
-    icon: AccountCogOutline,
-    path: '/account-settings'
-  })
+  items.push(
+    { sectionTitle: 'Personal' } as any,
+    {
+      title: 'Account Settings',
+      icon: AccountCogOutline,
+      path: '/account-settings'
+    }
+  )
 
   return items
 }
