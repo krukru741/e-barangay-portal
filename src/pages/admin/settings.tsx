@@ -32,7 +32,9 @@ const AdminSettingsPage = () => {
     province: '',
     contactNumber: '',
     email: '',
-    logoUrl: ''
+    logoUrl: '',
+    cityLogoUrl: '',
+    watermarkUrl: ''
   })
 
   const role = (session?.user as any)?.role
@@ -52,7 +54,9 @@ const AdminSettingsPage = () => {
             province: d.province || '',
             contactNumber: d.contactNumber || '',
             email: d.email || '',
-            logoUrl: d.logoUrl || ''
+            logoUrl: d.logoUrl || '',
+            cityLogoUrl: d.cityLogoUrl || '',
+            watermarkUrl: d.watermarkUrl || ''
           })
           setLoading(false)
         })
@@ -61,6 +65,17 @@ const AdminSettingsPage = () => {
   }, [session, role, router])
 
   const [error, setError] = useState('')
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setSettings(prev => ({ ...prev, [field]: reader.result as string }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -144,15 +159,71 @@ const AdminSettingsPage = () => {
               {settings.email && <Typography variant='body2' color='textSecondary'>✉️ {settings.email}</Typography>}
             </Box>
             <Divider sx={{ width: '100%' }} />
-            <TextField
-              fullWidth
-              label='Logo URL'
-              size='small'
-              value={settings.logoUrl}
-              onChange={e => setSettings({ ...settings, logoUrl: e.target.value })}
-              helperText='Paste image URL or Cloudinary link'
-              InputProps={{ startAdornment: <CloudUploadOutline sx={{ mr: 1, color: 'text.secondary' }} /> }}
+            
+            {/* Hidden file input for uploads */}
+            <input
+              type="file"
+              accept="image/*"
+              id="upload-brgy-logo"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileUpload(e, 'logoUrl')}
             />
+            <input
+              type="file"
+              accept="image/*"
+              id="upload-city-logo"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileUpload(e, 'cityLogoUrl')}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              id="upload-watermark"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileUpload(e, 'watermarkUrl')}
+            />
+
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+              <TextField
+                fullWidth
+                label='Barangay Logo URL'
+                size='small'
+                value={settings.logoUrl}
+                onChange={e => setSettings({ ...settings, logoUrl: e.target.value })}
+                helperText='Paste URL or upload image'
+              />
+              <Button component="label" htmlFor="upload-brgy-logo" variant="outlined" sx={{ minWidth: 40, p: 2 }}>
+                <CloudUploadOutline />
+              </Button>
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+              <TextField
+                fullWidth
+                label='City Logo URL'
+                size='small'
+                value={settings.cityLogoUrl}
+                onChange={e => setSettings({ ...settings, cityLogoUrl: e.target.value })}
+                helperText='Paste URL or upload image'
+              />
+              <Button component="label" htmlFor="upload-city-logo" variant="outlined" sx={{ minWidth: 40, p: 2 }}>
+                <CloudUploadOutline />
+              </Button>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+              <TextField
+                fullWidth
+                label='Watermark/Seal URL'
+                size='small'
+                value={settings.watermarkUrl}
+                onChange={e => setSettings({ ...settings, watermarkUrl: e.target.value })}
+                helperText='Paste URL or upload image'
+              />
+              <Button component="label" htmlFor="upload-watermark" variant="outlined" sx={{ minWidth: 40, p: 2 }}>
+                <CloudUploadOutline />
+              </Button>
+            </Box>
           </CardContent>
         </Card>
       </Grid>

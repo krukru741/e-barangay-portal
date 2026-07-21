@@ -22,17 +22,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'PUT') {
-      const { barangayName, cityMunicipality, province, contactNumber, email, logoUrl } = req.body
+      const { barangayName, cityMunicipality, province, contactNumber, email, logoUrl, cityLogoUrl, watermarkUrl } = req.body
       let settings = await prisma.systemSettings.findFirst()
       
       if (settings) {
         settings = await prisma.systemSettings.update({
           where: { id: settings.id },
-          data: { barangayName, cityMunicipality, province, contactNumber, email, logoUrl }
+          data: { barangayName, cityMunicipality, province, contactNumber, email, logoUrl, cityLogoUrl, watermarkUrl }
         })
       } else {
         settings = await prisma.systemSettings.create({
-          data: { barangayName, cityMunicipality, province, contactNumber, email, logoUrl }
+          data: { barangayName, cityMunicipality, province, contactNumber, email, logoUrl, cityLogoUrl, watermarkUrl }
         })
       }
       

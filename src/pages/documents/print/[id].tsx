@@ -126,26 +126,38 @@ export default function DocumentPrintView() {
   return (
     <Box sx={{ p: 4, maxWidth: '850px', margin: '0 auto', bgcolor: 'white', color: 'black', fontFamily: 'Arial, sans-serif', position: 'relative' }}>
       
-      {/* Watermark */}
+      {/* Watermark Background */}
       <Box sx={{
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         opacity: 0.1,
-        pointerEvents: 'none',
         zIndex: 0,
+        pointerEvents: 'none',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         width: '500px',
         height: '500px',
-        border: '5px solid #000',
-        borderRadius: '50%',
       }}>
-        <Typography variant="h1" sx={{ color: '#000', fontWeight: 'bold', textAlign: 'center' }}>
-          TALISAY CITY<br/>SEAL
-        </Typography>
+        {settings.watermarkUrl ? (
+          <img src={settings.watermarkUrl} alt="Watermark" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        ) : (
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+            border: '5px solid #000',
+            borderRadius: '50%',
+          }}>
+            <Typography variant="h1" sx={{ color: '#000', fontWeight: 'bold', textAlign: 'center' }}>
+              TALISAY CITY<br/>SEAL
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Box sx={{ position: 'relative', zIndex: 1 }}>
@@ -157,25 +169,30 @@ export default function DocumentPrintView() {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, pb: 2 }}>
         {/* Left Logo */}
-        <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: settings.logoUrl ? 'none' : '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
           {settings.logoUrl ? (
             <img src={settings.logoUrl} alt="Barangay Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           ) : (
             <Typography variant="caption">BRGY LOGO</Typography>
           )}
         </Box>
-
-        <Box sx={{ textAlign: 'center' }}>
+        
+        {/* Center Text */}
+        <Box sx={{ textAlign: 'center', flex: 1, px: 2 }}>
           <Typography variant="body1">Republic of the Philippines</Typography>
           <Typography variant="body1">Province of {settings.province}</Typography>
-          <Typography variant="body1">{settings.cityMunicipality?.toUpperCase()}</Typography>
-          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{settings.barangayName?.toUpperCase()}</Typography>
+          <Typography variant="body1" sx={{ textTransform: 'uppercase' }}>{settings.cityMunicipality}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', textTransform: 'uppercase', mt: 1 }}>{settings.barangayName} HALL</Typography>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>OFFICE OF THE BARANGAY CAPTAIN</Typography>
         </Box>
 
         {/* Right Logo */}
-        <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Typography variant="caption">CITY LOGO</Typography>
+        <Box sx={{ width: 100, height: 100, borderRadius: '50%', border: settings.cityLogoUrl ? 'none' : '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          {settings.cityLogoUrl ? (
+            <img src={settings.cityLogoUrl} alt="City Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          ) : (
+            <Typography variant="caption">CITY LOGO</Typography>
+          )}
         </Box>
       </Box>
 

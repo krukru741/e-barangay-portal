@@ -188,6 +188,8 @@ model SystemSettings {
   contactNumber    String?
   email            String?
   logoUrl          String?
+  cityLogoUrl      String?
+  watermarkUrl     String?
   updatedAt        DateTime @updatedAt
 }
 
