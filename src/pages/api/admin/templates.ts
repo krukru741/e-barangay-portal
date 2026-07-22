@@ -4,90 +4,69 @@ import { authOptions } from '../auth/[...nextauth]'
 import { prisma } from 'src/lib/db'
 
 export const DEFAULT_TEMPLATES: Record<string, string> = {
-  CLEARANCE: `<div style="font-family: Arial, sans-serif; padding: 40px;">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h2>BARANGAY CLEARANCE</h2>
-    <p>Republic of the Philippines</p>
-    <p><strong>{{barangayName}}</strong></p>
-    <p>{{cityMunicipality}}, {{province}}</p>
-  </div>
-  <p>TO WHOM IT MAY CONCERN:</p>
-  <p>This is to certify that <strong>{{residentName}}</strong>, {{age}} years old, {{civilStatus}}, a resident of <strong>{{address}}</strong>, has been known to be a person of good moral character and has not been involved in any criminal activities in this barangay.</p>
-  <p>This certification is issued upon the request of the above-named person for <strong>{{purpose}}</strong>.</p>
-  <p>Issued this {{date}} at {{barangayName}}, {{cityMunicipality}}, {{province}}.</p>
-  <br/><br/>
-  <p style="text-align: center;"><strong>HON. {{captainName}}</strong><br/>Barangay Captain</p>
-</div>`,
-  RESIDENCY: `<div style="font-family: Arial, sans-serif; padding: 40px;">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h2>CERTIFICATE OF RESIDENCY</h2>
-    <p>Republic of the Philippines</p>
-    <p><strong>{{barangayName}}</strong></p>
-    <p>{{cityMunicipality}}, {{province}}</p>
-  </div>
-  <p>TO WHOM IT MAY CONCERN:</p>
-  <p>This is to certify that <strong>{{residentName}}</strong>, {{age}} years old, {{civilStatus}}, is a bonafide resident of <strong>{{address}}</strong>, {{barangayName}}, {{cityMunicipality}}, for <strong>{{yearsOfResidency}}</strong> years.</p>
-  <p>This certification is issued upon the request of the above-named person for <strong>{{purpose}}</strong>.</p>
-  <p>Issued this {{date}} at {{barangayName}}, {{cityMunicipality}}, {{province}}.</p>
-  <br/><br/>
-  <p style="text-align: center;"><strong>HON. {{captainName}}</strong><br/>Barangay Captain</p>
-</div>`,
-  INDIGENCY: `<div style="font-family: Arial, sans-serif; padding: 40px;">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h2>CERTIFICATE OF INDIGENCY</h2>
-    <p>Republic of the Philippines</p>
-    <p><strong>{{barangayName}}</strong></p>
-    <p>{{cityMunicipality}}, {{province}}</p>
-  </div>
-  <p>TO WHOM IT MAY CONCERN:</p>
-  <p>This is to certify that <strong>{{residentName}}</strong>, {{age}} years old, a resident of <strong>{{address}}</strong>, belongs to an indigent family with limited financial capability.</p>
-  <p>This certification is issued upon the request of the above-named person for <strong>{{purpose}}</strong>.</p>
-  <p>Issued this {{date}} at {{barangayName}}, {{cityMunicipality}}, {{province}}.</p>
-  <br/><br/>
-  <p style="text-align: center;"><strong>HON. {{captainName}}</strong><br/>Barangay Captain</p>
-</div>`,
-  GOOD_MORAL: `<div style="font-family: Arial, sans-serif; padding: 40px;">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h2>CERTIFICATE OF GOOD MORAL CHARACTER</h2>
-    <p>Republic of the Philippines</p>
-    <p><strong>{{barangayName}}</strong></p>
-    <p>{{cityMunicipality}}, {{province}}</p>
-  </div>
-  <p>TO WHOM IT MAY CONCERN:</p>
-  <p>This is to certify that <strong>{{residentName}}</strong>, {{age}} years old, is a resident of <strong>{{address}}</strong> and is known to be a person of good moral character, upright and law-abiding citizen.</p>
-  <p>This certification is issued upon the request of the above-named person for <strong>{{purpose}}</strong>.</p>
-  <p>Issued this {{date}} at {{barangayName}}, {{cityMunicipality}}, {{province}}.</p>
-  <br/><br/>
-  <p style="text-align: center;"><strong>HON. {{captainName}}</strong><br/>Barangay Captain</p>
-</div>`,
-  BUSINESS: `<div style="font-family: Arial, sans-serif; padding: 40px;">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h2>BARANGAY BUSINESS CLEARANCE</h2>
-    <p>Republic of the Philippines</p>
-    <p><strong>{{barangayName}}</strong></p>
-    <p>{{cityMunicipality}}, {{province}}</p>
-  </div>
-  <p>TO WHOM IT MAY CONCERN:</p>
-  <p>This is to certify that <strong>{{residentName}}</strong>, owner of <strong>{{businessName}}</strong> located at <strong>{{businessAddress}}</strong>, has been granted clearance to operate said business in this barangay.</p>
-  <p>This clearance is issued upon the request of the above-named person for <strong>{{purpose}}</strong>.</p>
-  <p>Issued this {{date}} at {{barangayName}}, {{cityMunicipality}}, {{province}}.</p>
-  <br/><br/>
-  <p style="text-align: center;"><strong>HON. {{captainName}}</strong><br/>Barangay Captain</p>
-</div>`,
-  ENDORSEMENT: `<div style="font-family: Arial, sans-serif; padding: 40px;">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h2>ENDORSEMENT LETTER</h2>
-    <p>Republic of the Philippines</p>
-    <p><strong>{{barangayName}}</strong></p>
-    <p>{{cityMunicipality}}, {{province}}</p>
-  </div>
-  <p>TO WHOM IT MAY CONCERN:</p>
-  <p>This is to endorse and recommend <strong>{{residentName}}</strong>, {{age}} years old, a resident of <strong>{{address}}</strong>, for your favorable consideration and assistance.</p>
-  <p>This endorsement is issued in behalf of the above-named person for <strong>{{purpose}}</strong>.</p>
-  <p>Issued this {{date}} at {{barangayName}}, {{cityMunicipality}}, {{province}}.</p>
-  <br/><br/>
-  <p style="text-align: center;"><strong>HON. {{captainName}}</strong><br/>Barangay Captain</p>
-</div>`,
+  CLEARANCE: `<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify that <strong>{{fullName}}</strong>, {{age}} years of age, 
+  is a bona fide resident of {{address}}.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify further that he/she is known to us personally as a person of good moral character 
+  and has no criminal record and no disciplinary action against this barangay.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This certification is hereby issued upon the request of the abovementioned person in connection 
+  to his/her application for <strong>{{purpose}}</strong> or for whatever legal purpose that may serve him/her best.
+</p>`,
+  RESIDENCY: `<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify that <strong>{{fullName}}</strong>, {{age}} years of age, 
+  is a bona fide resident of {{address}}.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  Based on records of this office, he/she has been residing in this barangay and is known to be a law-abiding citizen of good moral character.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This certification is being issued upon the request of the above-named person for <strong>{{purpose}}</strong> or whatever legal purposes it may serve.
+</p>`,
+  INDIGENCY: `<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify that <strong>{{fullName}}</strong>, {{age}} years of age, 
+  is a bona fide resident of {{address}}.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This further certifies that the above-named person belongs to an indigent family in our barangay whose combined family income is insufficient to support their basic needs.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This certification is being issued upon the request of the above-named person for <strong>{{purpose}}</strong> or whatever legal purposes it may serve.
+</p>`,
+  GOOD_MORAL: `<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify that <strong>{{fullName}}</strong>, {{age}} years of age, 
+  is a bona fide resident of {{address}}.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify further that he/she is a person of good moral character, has no derogatory record on file, and is a law-abiding citizen in this community.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This certification is hereby issued upon the request of the abovementioned person for <strong>{{purpose}}</strong>.
+</p>`,
+  BUSINESS: `<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This is to certify that the business or trade activity described below:
+</p>
+<div style="margin-left: 40px; margin-bottom: 16px;">
+  <p><strong>Business Name:</strong> {{businessName}}</p>
+  <p><strong>Address:</strong> {{businessAddress}}</p>
+  <p><strong>Operator/Owner:</strong> {{fullName}}</p>
+</div>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  has been granted a Barangay Clearance to operate within the territorial jurisdiction of this barangay, subject to the provisions of existing laws and ordinances.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This clearance is granted for the purpose of securing a <strong>{{purpose}}</strong>.
+</p>`,
+  ENDORSEMENT: `<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  This office respectfully endorses the application of <strong>{{fullName}}</strong>, {{age}} years of age, 
+  and a bona fide resident of {{address}}.
+</p>
+<p style="text-indent: 40px; margin-bottom: 16px; text-align: justify;">
+  The aforementioned individual is being endorsed for <strong>{{purpose}}</strong>. Any assistance extended to him/her will be highly appreciated by this office.
+</p>`,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
