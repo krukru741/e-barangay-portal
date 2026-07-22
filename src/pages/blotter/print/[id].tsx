@@ -117,7 +117,7 @@ export default function BlotterPrintView({ blotter, officials, settings }: Props
         {/* Print/Back buttons — hidden when printing */}
         <Box sx={{ '@media print': { display: 'none' }, mb: 4, textAlign: 'center' }}>
           <Button variant="contained" onClick={() => window.print()}>Print Document</Button>
-          <Button sx={{ ml: 2 }} variant="outlined" onClick={() => router.back()}>Back</Button>
+          <Button sx={{ ml: 2 }} variant="outlined" onClick={() => router.push(`/blotter/${blotter.id}`)}>Back</Button>
         </Box>
 
         {/* Header */}
