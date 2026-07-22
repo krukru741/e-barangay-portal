@@ -24,6 +24,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     page.on('pageerror', error => console.error('PUPPETEER ERROR:', error.message));
     page.on('requestfailed', request => console.error('PUPPETEER REQUEST FAILED:', request.url(), request.failure()?.errorText));
 
+    // Pass the user's session cookie to Puppeteer so it can access authenticated pages
+    if (req.headers.cookie) {
+      await page.setExtraHTTPHeaders({ cookie: req.headers.cookie })
+    }
+
     // Set viewport to a good print size
     await page.setViewport({ width: 1200, height: 1600 })
     
