@@ -13,21 +13,31 @@ import CircularProgress from '@mui/material/CircularProgress'
 import DatabaseExportOutline from 'mdi-material-ui/DatabaseExportOutline'
 import ShieldCheckOutline from 'mdi-material-ui/ShieldCheckOutline'
 import InformationOutline from 'mdi-material-ui/InformationOutline'
+import CheckboxMarkedOutline from 'mdi-material-ui/CheckboxMarkedOutline'
+import CheckboxBlankOutline from 'mdi-material-ui/CheckboxBlankOutline'
 
 const BackupPage = () => {
   const { data: session } = useSession()
   const router = useRouter()
   const [downloading, setDownloading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [selectedModules, setSelectedModules] = useState<string[]>([
+    'residents', 'documents', 'blotters', 'officials', 'announcements', 'finance'
+  ])
 
   const role = (session?.user as any)?.role
   const isAdmin = session && ['ADMIN', 'SUPER_ADMIN'].includes(role)
 
   const handleBackup = async () => {
+    if (selectedModules.length === 0) {
+      alert('Please select at least one module to backup.')
+      return
+    }
+
     setDownloading(true)
     setSuccess(false)
     try {
-      const res = await fetch('/api/admin/backup')
+      const res = await fetch(`/api/admin/backup?include=${selectedModules.join(',')}`)
       if (!res.ok) throw new Error('Failed to generate backup')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
@@ -150,36 +160,56 @@ const BackupPage = () => {
           <CardContent>
             <Grid container spacing={2}>
               {[
-                { label: 'Residents', desc: 'All registered residents and household info', link: '/residents' },
-                { label: 'Documents', desc: 'All document requests and their status', link: '/documents' },
-                { label: 'Blotter Cases', desc: 'All blotter entries and hearing schedules', link: '/blotter' },
-                { label: 'Officials', desc: 'All registered barangay officials', link: '/officials' },
-                { label: 'Announcements', desc: 'All posted announcements and bulletins', link: '/announcements' },
-                { label: 'Finance', desc: 'Budget records and expenditure logs', link: '/finance' },
-              ].map(item => (
-                <Grid item xs={12} md={4} key={item.label}>
-                  <Box 
-                    onClick={() => router.push(item.link)}
-                    sx={{ 
-                      p: 2, 
-                      borderRadius: 2, 
-                      backgroundColor: '#f5f7fa', 
-                      border: '1px solid #e0e0e0',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      '&:hover': {
-                        backgroundColor: '#e3f2fd',
-                        borderColor: '#90caf9',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
-                      }
-                    }}
-                  >
-                    <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>✅ {item.label}</Typography>
-                    <Typography variant='body2' color='textSecondary'>{item.desc}</Typography>
-                  </Box>
-                </Grid>
-              ))}
+                { id: 'residents', label: 'Residents', desc: 'All registered residents and household info' },
+                { id: 'documents', label: 'Documents', desc: 'All document requests and their status' },
+                { id: 'blotters', label: 'Blotter Cases', desc: 'All blotter entries and hearing schedules' },
+                { id: 'officials', label: 'Officials', desc: 'All registered barangay officials' },
+                { id: 'announcements', label: 'Announcements', desc: 'All posted announcements and bulletins' },
+                { id: 'finance', label: 'Finance', desc: 'Budget records and expenditure logs' },
+              ].map(item => {
+                const isSelected = selectedModules.includes(item.id)
+                return (
+                  <Grid item xs={12} md={4} key={item.id}>
+                    <Box 
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedModules(selectedModules.filter(m => m !== item.id))
+                        } else {
+                          setSelectedModules([...selectedModules, item.id])
+                        }
+                      }}
+                      sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        backgroundColor: isSelected ? '#f5f7fa' : '#ffffff', 
+                        border: '1px solid',
+                        borderColor: isSelected ? '#e0e0e0' : '#eeeeee',
+                        opacity: isSelected ? 1 : 0.6,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 1.5,
+                        '&:hover': {
+                          backgroundColor: '#e3f2fd',
+                          borderColor: '#90caf9',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                          opacity: 1
+                        }
+                      }}
+                    >
+                      {isSelected 
+                        ? <CheckboxMarkedOutline sx={{ color: 'success.main', mt: 0.2 }} /> 
+                        : <CheckboxBlankOutline sx={{ color: 'action.disabled', mt: 0.2 }} />}
+                      <Box>
+                        <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>{item.label}</Typography>
+                        <Typography variant='body2' color='textSecondary'>{item.desc}</Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                )
+              })}
             </Grid>
           </CardContent>
         </Card>
