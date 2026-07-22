@@ -150,7 +150,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="document-${id}.pdf"`)
-    res.send(pdfBuffer)
+    res.send(Buffer.from(pdfBuffer))
 
   } catch (error: any) {
     console.error('PDF Gen Error:', error)
