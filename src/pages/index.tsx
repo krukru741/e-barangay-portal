@@ -11,7 +11,7 @@ import Button from '@mui/material/Button'
 import Link from 'next/link'
 import AccountGroupOutline from 'mdi-material-ui/AccountGroupOutline'
 import FileDocumentOutline from 'mdi-material-ui/FileDocumentOutline'
-import LockOutline from 'mdi-material-ui/LockOutline'
+import ScaleBalance from 'mdi-material-ui/ScaleBalance'
 import AccountTieOutline from 'mdi-material-ui/AccountTieOutline'
 import ChevronRight from 'mdi-material-ui/ChevronRight'
 import BullhornOutline from 'mdi-material-ui/BullhornOutline'
@@ -67,7 +67,7 @@ const Dashboard = () => {
   const statCards = [
     { label: 'Total Residents', value: stats?.totalResidents ?? '—', icon: <AccountGroupOutline sx={{ fontSize: 32, color: 'white' }} />, gradient: 'linear-gradient(135deg, #1e88e5 0%, #1565c0 100%)', shadow: 'rgba(30,136,229,0.4)', link: '/residents' },
     { label: 'Document Requests', value: recentDocs.length > 0 ? (recentDocs.filter(d => d.status === 'PENDING').length + ' Pending') : '—', icon: <FileDocumentOutline sx={{ fontSize: 32, color: 'white' }} />, gradient: 'linear-gradient(135deg, #ff9800 0%, #e65100 100%)', shadow: 'rgba(255,152,0,0.4)', link: '/documents' },
-    { label: 'Blotter Cases', value: stats?.totalBlotters ?? '—', icon: <LockOutline sx={{ fontSize: 32, color: 'white' }} />, gradient: 'linear-gradient(135deg, #e53935 0%, #c62828 100%)', shadow: 'rgba(229,57,53,0.4)', link: '/blotter' },
+    { label: 'Blotter Cases', value: stats?.totalBlotters ?? '—', icon: <ScaleBalance sx={{ fontSize: 32, color: 'white' }} />, gradient: 'linear-gradient(135deg, #e53935 0%, #c62828 100%)', shadow: 'rgba(229,57,53,0.4)', link: '/blotter' },
     { label: 'Announcements', value: stats?.totalAnnouncements ?? '—', icon: <BullhornOutline sx={{ fontSize: 32, color: 'white' }} />, gradient: 'linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%)', shadow: 'rgba(142,36,170,0.4)', link: '/announcements' },
   ]
 
@@ -155,14 +155,14 @@ const Dashboard = () => {
           <CardContent>
             <Grid container spacing={4}>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minHeight: 300 }}>
                   {!loading && demographics?.gender && (
                     <ReactApexcharts
                       options={{
                         labels: ['Male', 'Female', 'Other'],
                         colors: ['#1e88e5', '#e91e63', '#9e9e9e'],
-                        dataLabels: { enabled: true },
-                        legend: { position: 'bottom' },
+                        dataLabels: { enabled: true, style: { fontSize: '12px' } },
+                        legend: { position: 'bottom', offsetY: 10 },
                         plotOptions: { pie: { donut: { size: '65%' } } }
                       }}
                       series={[
@@ -171,7 +171,8 @@ const Dashboard = () => {
                         demographics.gender.OTHER || 0
                       ]}
                       type='donut'
-                      height={250}
+                      height={320}
+                      width='100%'
                     />
                   )}
                 </Box>
@@ -185,14 +186,14 @@ const Dashboard = () => {
                   <Chip label={`4Ps: ${demographics?.vulnerableSectors?.fourPs || 0}`} color="warning" variant="outlined" sx={{ fontWeight: 600 }} />
                 </Box>
                 <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Community</Typography>
-                <Box sx={{ display: 'flex', gap: 4 }}>
-                  <Box>
+                <Box sx={{ display: 'flex', gap: 5 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Typography variant='h5' sx={{ fontWeight: 700 }}>{demographics?.households || 0}</Typography>
-                    <Typography variant='caption' color='textSecondary'>Total Households</Typography>
+                    <Typography variant='caption' color='textSecondary' sx={{ mt: 0.5, display: 'block', lineHeight: 1.2 }}>Total<br/>Households</Typography>
                   </Box>
-                  <Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Typography variant='h5' sx={{ fontWeight: 700, color: 'primary.main' }}>{demographics?.voters || 0}</Typography>
-                    <Typography variant='caption' color='textSecondary'>Registered Voters</Typography>
+                    <Typography variant='caption' color='textSecondary' sx={{ mt: 0.5, display: 'block', lineHeight: 1.2 }}>Registered<br/>Voters</Typography>
                   </Box>
                 </Box>
               </Grid>
